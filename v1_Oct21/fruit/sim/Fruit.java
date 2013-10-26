@@ -17,7 +17,7 @@ public class Fruit
 
     // enable gui
     // private static boolean gui = true;
-    private static boolean gui = false;
+    private static boolean gui = true;
 
     // Step by step trace
     private static boolean trace = true;

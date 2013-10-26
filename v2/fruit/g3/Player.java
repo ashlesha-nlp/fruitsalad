@@ -32,26 +32,40 @@ public class Player extends fruit.sim.Player
 			// System.out.println("Fruit " + i + " = " + fruits[i]);
 		}
 		System.out.println("Bowl Score: " + bowlScore);
-
+		System.out.println("Round: "+round);
 		if (round == 0) {
 			bowlsSeenR0++;
+			System.out.println("Bowls seen: "+bowlsSeenR0);
 
 			if (maxBowlsR0 == 3) {
+				System.out.println("inside max bowls = 3");
 				if (bowlsSeenR0 >= 2) {
 					int maxScore = getMaxScore(scoresSeenR0);
 					scoresSeenR0.add(bowlScore);
-					return maxScore > bowlScore;
+					System.out.println("Max Score: "+maxScore);
+					return maxScore <= bowlScore;
+				}
+				else
+				{
+					System.out.println("Want to pass... "+"true");
+					scoresSeenR0.add(bowlScore);
+					return false;
 				}
 			}
-
-			if (Math.floor((double)(maxBowlsR0)/(double)(Math.E)) > bowlsSeenR0) {
+			System.out.println("n/e value: "+Math.floor((double)(maxBowlsR0)/(double)(Math.E)));
+			
+			if (Math.floor((double)(maxBowlsR0)/(double)(Math.E)) < bowlsSeenR0) {
+				System.out.println("inside general case");
 				int maxScore = getMaxScore(scoresSeenR0);
 				scoresSeenR0.add(bowlScore);
-				return maxScore > bowlScore;
+				System.out.println("Max Score: "+maxScore);
+				return maxScore <= bowlScore;
 			}
 			else {
+				System.out.println("else...");
 				scoresSeenR0.add(bowlScore);
-				return true;
+				System.out.println("Want to pass... "+"true");
+				return false;
 			}
 		}
 		
@@ -59,21 +73,33 @@ public class Player extends fruit.sim.Player
 			bowlsSeenR1++;
 
 			if (maxBowlsR1 == 3) {
+				System.out.println("inside max bowls = 3");
 				if (bowlsSeenR1 >= 2) {
 					int maxScore = getMaxScore(scoresSeenR1);
 					scoresSeenR1.add(bowlScore);
-					return maxScore > bowlScore;
+					return maxScore <= bowlScore;
+				}
+				else
+				{
+					System.out.println("Want to pass... "+"true");
+					scoresSeenR1.add(bowlScore);
+					return false;
 				}
 			}
-
-			if (Math.floor((double)(maxBowlsR1)/(double)(Math.E)) > bowlsSeenR1) {
+			System.out.println("n/e value: "+Math.floor((double)(maxBowlsR0)/(double)(Math.E)));
+			
+			if (Math.floor((double)(maxBowlsR1)/(double)(Math.E)) < bowlsSeenR1) {
+				System.out.println("inside general case");
 				int maxScore = getMaxScore(scoresSeenR1);
 				scoresSeenR1.add(bowlScore);
-				return maxScore > bowlScore;
+				System.out.println("Max Score: "+maxScore);
+				return maxScore <= bowlScore;
 			}
 			else {
+				System.out.println("else...");
 				scoresSeenR1.add(bowlScore);
-				return true;
+				System.out.println("Want to pass... "+"true");
+				return false;
 			}
 		}
 
@@ -109,7 +135,7 @@ public class Player extends fruit.sim.Player
 		System.out.println("Bowl Score: " + bowlScore);
 		return bowlScore > expectedScore;*/
 		System.out.println("Returning false");
-		return false;
+		return true;
     }
 	
 	private int getMaxScore(ArrayList<Integer> scoresSeen) {
