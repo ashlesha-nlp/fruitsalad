@@ -89,6 +89,11 @@ public class Player extends fruit.sim.Player
 		}
 		double rat=sum/sumDist;
 		expectedScore = expectedScore * rat;
+		System.out.println("Expected Score: " + expectedScore);
+		System.out.println("Bowl Score: " + bowlScore);
+		System.out.println("Sum: " + sum);
+		System.out.println("Sum Distribution: " + sumDist);
+		System.out.println("Ratio: " + rat);
 
 		System.out.println("Strategy 1");
 		return bowlScore > expectedScore;
