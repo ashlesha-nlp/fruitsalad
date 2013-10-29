@@ -8,12 +8,17 @@ public class Player extends fruit.sim.Player
 		this.preferences = pref.clone();
 		this.id = this.getIndex();
 		this.players = nplayers;
-		this.maxBowlsR0 = this.players - this.id;
-		this.maxBowlsR1 = this.id + 1;
+		this.maxBowls[0] = this.players - this.id;
+		this.maxBowls[1] = this.id + 1;
 		System.out.println("Player ID: " + this.id);
-		System.out.println("Max bowls can be seen: Round 0: " + this.maxBowlsR0);
-		System.out.println("Max bowls can be seen: Round 1: " + this.maxBowlsR1);
-
+		System.out.println("Max bowls can be seen: Round 0: " + this.maxBowls[0]);
+		System.out.println("Max bowls can be seen: Round 1: " + this.maxBowls[1]);
+		this.start[0] = 0;
+		this.start[1] = maxBowls[0] - 1;
+		this.len[0] = 0;
+		this.len[1] = 1;
+		if (this.maxBowls[0] < 4) this.strategy = 0;
+		else this.strategy = 1;
 		for (int i = 0; i < 12; i++) {
 			this.fruits[i] = 1;
 		}
@@ -23,126 +28,77 @@ public class Player extends fruit.sim.Player
     public boolean pass(int[] bowl, int bowlId, int round,
                         boolean canPick,
                         boolean musTake) {
-
+		
 		int bowlScore = 0;
+		double expectedScore = 0;
+		while (strategy == 0 || (strategy == 1 && round == 0)) {
 
-		for (int i = 0; i < 12; i++) {
-			fruits[i] += (double)(bowl[i])/2;
-			bowlScore = bowlScore + (bowl[i]*preferences[i]);
-			// System.out.println("Fruit " + i + " = " + fruits[i]);
-		}
-		System.out.println("Bowl Score: " + bowlScore);
-		System.out.println("Round: "+round);
-		if (round == 0) {
-			bowlsSeenR0++;
-			System.out.println("Bowls seen: "+bowlsSeenR0);
+			for (int i = 0; i < 12; i++) {
+				fruits[i] += (double)(bowl[i])/2;
+				bowlScore = bowlScore + (bowl[i]*preferences[i]);
+				dist[i]+=bowl[i]/2.0;
+			}
+			System.out.println("Bowl Score: " + bowlScore);
+			System.out.println("Round: "+round);
 
-			if (maxBowlsR0 == 3) {
+			bowlsSeen[round]++;
+
+			if (maxBowls[round] == 3) {
 				System.out.println("inside max bowls = 3");
-				if (bowlsSeenR0 >= 2) {
-					int maxScore = getMaxScore(scoresSeenR0);
-					scoresSeenR0.add(bowlScore);
+				if (bowlsSeen[round] >= 2) {
+					int maxScore = getMaxScore(scoresSeen, start[round], len[round]);
+					scoresSeen.add(bowlScore);
+					len[round]++;
 					System.out.println("Max Score: "+maxScore);
 					return maxScore <= bowlScore;
 				}
 				else
 				{
 					System.out.println("Want to pass... "+"true");
-					scoresSeenR0.add(bowlScore);
+					scoresSeen.add(bowlScore);
+					len[round]++;
 					return false;
 				}
 			}
-			System.out.println("n/e value: "+Math.floor((double)(maxBowlsR0)/(double)(Math.E)));
-			
-			if (Math.floor((double)(maxBowlsR0)/(double)(Math.E)) < bowlsSeenR0) {
+			System.out.println("n/e value: "+Math.floor((double)(maxBowls[round])/(double)(Math.E)));
+		
+			if (Math.floor((double)(maxBowls[round])/(double)(Math.E)) < bowlsSeen[round]) {
 				System.out.println("inside general case");
-				int maxScore = getMaxScore(scoresSeenR0);
-				scoresSeenR0.add(bowlScore);
+				int maxScore = getMaxScore(scoresSeen, start[round], len[round]);
+				scoresSeen.add(bowlScore);
+				len[round]++;
 				System.out.println("Max Score: "+maxScore);
 				return maxScore <= bowlScore;
 			}
 			else {
 				System.out.println("else...");
-				scoresSeenR0.add(bowlScore);
+				scoresSeen.add(bowlScore);
+				len[round]++;
 				System.out.println("Want to pass... "+"true");
 				return false;
-			}
-		}
-		
-		if (round == 1) {
-			bowlsSeenR1++;
-
-			if (maxBowlsR1 == 3) {
-				System.out.println("inside max bowls = 3");
-				if (bowlsSeenR1 >= 2) {
-					int maxScore = getMaxScore(scoresSeenR1);
-					scoresSeenR1.add(bowlScore);
-					return maxScore <= bowlScore;
-				}
-				else
-				{
-					System.out.println("Want to pass... "+"true");
-					scoresSeenR1.add(bowlScore);
-					return false;
-				}
-			}
-			System.out.println("n/e value: "+Math.floor((double)(maxBowlsR0)/(double)(Math.E)));
-			
-			if (Math.floor((double)(maxBowlsR1)/(double)(Math.E)) < bowlsSeenR1) {
-				System.out.println("inside general case");
-				int maxScore = getMaxScore(scoresSeenR1);
-				scoresSeenR1.add(bowlScore);
-				System.out.println("Max Score: "+maxScore);
-				return maxScore <= bowlScore;
-			}
-			else {
-				System.out.println("else...");
-				scoresSeenR1.add(bowlScore);
-				System.out.println("Want to pass... "+"true");
-				return false;
-			}
+			}		
 		}
 
-		/*int fruitQuantity = 0;
-		int expectedScore = 0;
-		System.out.println("ID: " + bowlId);
-		
+		double sum=0, sumDist=0;
 		for (int i = 0; i < bowl.length; i++) {
-			System.out.println(i + " " + bowl[i]);
-			fruitQuantity = fruitQuantity + bowl[i];
+			dist[i]+=bowl[i]/2.0;
 			bowlScore = bowlScore + (bowl[i]*preferences[i]);
+			expectedScore = expectedScore + (dist[i]*preferences[i]);
+			sumDist+=dist[i];
+			sum += bowl[i];
 		}
-		expectedScore = ((fruitQuantity*(fruitQuantity+1)/2)*(fruitQuantity/12))+((fruitQuantity%12)*((fruitQuantity%12)+1)/2);
-		
-		for (int i = 0; i < preferences.length; i++) {
+		double rat=sum/sumDist;
+		expectedScore = expectedScore * rat;
 
-		/*int fruitQuantity = 0;
-		int expectedScore = 0;
-		System.out.println("ID: " + bowlId);
-		
-		for (int i = 0; i < bowl.length; i++) {
-			System.out.println(i + " " + bowl[i]);
-			fruitQuantity = fruitQuantity + bowl[i];
-			bowlScore = bowlScore + (bowl[i]*preferences[i]);
-		}
-		expectedScore = ((fruitQuantity*(fruitQuantity+1)/2)*(fruitQuantity/12))+((fruitQuantity%12)*((fruitQuantity%12)+1)/2);
-		
-		for (int i = 0; i < preferences.length; i++) {
-			System.out.print(i + " " + preferences[i] + " , ");
-		}
-		System.out.println();
-		System.out.println("Expected Score: " + expectedScore);
-		System.out.println("Bowl Score: " + bowlScore);
-		return bowlScore > expectedScore;*/
-		System.out.println("Returning false");
-		return true;
+		System.out.println("Strategy 1");
+		return bowlScore > expectedScore;
     }
 	
-	private int getMaxScore(ArrayList<Integer> scoresSeen) {
+	private int getMaxScore(ArrayList<Integer> scoresSeen, int start, int len) {
 		int max = 0;
-		for (int score : scoresSeen) {
-			if (max < score) {
-				max = score;
+		for (int i=start; i<len+start; i++) {
+			if (max < scoresSeen.get(i)) {
+				max = scoresSeen.get(i);
 			}
 		}
 		return max;
@@ -153,11 +109,13 @@ public class Player extends fruit.sim.Player
     private int[] preferences = new int[12];
 	private double[] fruits = new double[12];
 	private int id = 0;
-	private int bowlsSeenR0 = 0;
-	private int bowlsSeenR1 = 0;
-	private int maxBowlsR0 = 0;
-	private int maxBowlsR1 = 0;
+	private int[] bowlsSeen = new int [2];
+	private int[] maxBowls = new int[2];
+	private int[] start = new int[2];
 	private int players = 0;
-	private ArrayList<Integer> scoresSeenR0 = new ArrayList<Integer>();
-	private ArrayList<Integer> scoresSeenR1 = new ArrayList<Integer>();
+	private int strategy;
+	private double[] dist = new double[12];
+	private int[] len = new int[2];
+	private ArrayList<Integer> scoresSeen = new ArrayList<Integer>();
 }
+
