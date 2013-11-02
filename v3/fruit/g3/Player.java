@@ -51,6 +51,8 @@ public class Player extends fruit.sim.Player
     	bowlScore = buildDistribution(bowl, bowlId, round);
 		
     	if (maxBowls[round] == 2) {
+			scoresSeen.add(bowlScore);
+			len[round]++;
     		return Math.random()>0.5;
     	}
     	
@@ -134,6 +136,8 @@ public class Player extends fruit.sim.Player
     	if(strategy == 0 || (strategy==1 && round==1)){
     		System.out.println("Strategy: "+strategy+"\t"+"Round: "+round);
     		bowlScore = buildDistribution(bowl,bowlId,round);
+			scoresSeen.add(bowlScore);
+			len[round]++;
     		if(bowlsSeen[0]+bowlsSeen[1]>x)
     		{
     			expectedScore=calcExpectedScore(bowl);
@@ -184,6 +188,8 @@ public class Player extends fruit.sim.Player
 //    	}
 //    	bowlsSeen[round]++;	
     	
+		scoresSeen.add(bowlScore);
+		len[round]++;
     	System.out.println("Never reach here..");
     	return false;
     }
