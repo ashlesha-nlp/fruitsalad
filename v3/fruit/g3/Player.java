@@ -28,7 +28,8 @@ public class Player extends fruit.sim.Player
 		
 		//strategy 2: optimal stopping, 0: build distribution 1: optimal round 0
 		
-		int y=15;
+		int y=8;
+		x=4;
 		if(maxBowls[0]>y)
 			strategy = 0;
 		else if(maxBowls[1]+maxBowls[0]<y)
@@ -39,7 +40,6 @@ public class Player extends fruit.sim.Player
 //			strategy = 1;
 //		else 
 //			strategy = 3;
-		x=y/3;
 		
 
     }
@@ -95,12 +95,29 @@ public class Player extends fruit.sim.Player
     
     public int buildDistribution(int[] bowl, int bowlId, int round)
     {
+    	std_dev = 0;
     	int bowlScore=0;
     	for (int i = 0; i < 12; i++) {
 			fruits[i] += (double)(bowl[i])/2;
 			bowlScore = bowlScore + (bowl[i]*preferences[i]);
 			dist[i]+=bowl[i]/2.0;
 		}
+    	double mean = 0;
+    	for(int i=0;i<scoresSeen.size();i++)
+    	{
+    		mean+=scoresSeen.get(i);
+    	}
+    	mean+=bowlScore;
+    	mean/=(scoresSeen.size()+1);
+    	
+    	for(int i=0;i<scoresSeen.size();i++)
+    	{
+    		std_dev += (mean-scoresSeen.get(i))*(mean-scoresSeen.get(i));
+    	}
+    	std_dev += (mean-bowlScore)*(mean-bowlScore);
+    	std_dev /= (scoresSeen.size()+1);
+    	std_dev = Math.sqrt(std_dev);
+    	System.out.println("Standard Deviation: "+std_dev);
 		System.out.println("Bowl Score: " + bowlScore);
 		System.out.println("Round: "+round);
 //		bowlsSeen[round]++;
@@ -138,15 +155,32 @@ public class Player extends fruit.sim.Player
     		bowlScore = buildDistribution(bowl,bowlId,round);
 			scoresSeen.add(bowlScore);
 			len[round]++;
-    		if(bowlsSeen[0]+bowlsSeen[1]>x)
+    		if(bowlsSeen[0]+bowlsSeen[1]>=x)
     		{
     			expectedScore=calcExpectedScore(bowl);
+    			double multiplier=0;
+    			if(round == 0)
+    			{
+    				multiplier = ((double)maxBowls[round]-bowlsSeen[round])/((double)maxBowls[round]-x);
+    			}
+    			else 
+    			{
+    				double denominator=0;
+    				if(bowlsSeen[0]>x)
+    					denominator = (double)maxBowls[round];
+    				else
+    					denominator = (double)maxBowls[round]-x+bowlsSeen[0];
+    				multiplier = ((double)maxBowls[round]-bowlsSeen[round])/(denominator);
+    			}
+    			double updated_expectedScore = expectedScore+(multiplier*std_dev);
     			bowlsSeen[round]++;	
     			System.out.println("Bowl Score: "+bowlScore);
     			System.out.println("Expected Score: "+expectedScore);
+    			System.out.println("Multiplier: "+multiplier);
+    			System.out.println("Updated Expected Score: "+updated_expectedScore);
     			System.out.println("Bowls Seen: "+bowlsSeen[round]);
-    			
-    			return bowlScore > expectedScore;
+    			return bowlScore >= updated_expectedScore;
+//    			return bowlScore >= expectedScore+(multiplier*std_dev);
     		}
     		bowlsSeen[round]++;	
     		return false;
@@ -293,5 +327,6 @@ public class Player extends fruit.sim.Player
 	private double[] dist = new double[12];
 	private int[] len = new int[2];
 	private ArrayList<Integer> scoresSeen = new ArrayList<Integer>();
+	private double std_dev=0;
 }
 
